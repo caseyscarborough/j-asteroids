@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -13,9 +15,16 @@ import javax.swing.JFrame;
 
 public class GameBoard extends JFrame {
 	// Height and width of the gameboard
-	public static int boardWidth = 800;
+	public static int boardWidth = 1000;
 	public static int boardHeight = 800;
-
+	
+	public static boolean keyHeld = false;
+	public static int keyHeldCode;
+	
+	private final int KEY_W = 87;
+	private final int KEY_A = 65;
+	private final int KEY_S = 83;
+	private final int KEY_D = 68;
 	
 	public static void main(String[] args) {
 		new GameBoard();
@@ -26,6 +35,23 @@ public class GameBoard extends JFrame {
 		this.setSize(boardWidth, boardHeight);
 		this.setTitle("Java Asteroids");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		this.addKeyListener(new KeyListener() {
+			public void keyTyped(KeyEvent e) {}
+			public void keyPressed(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {
+				if(e.getKeyCode() == KEY_W) {
+					System.out.println("Forward"); 
+				} else if (e.getKeyCode() == KEY_S) {
+					System.out.println("Backward"); 
+				} else if (e.getKeyCode() == KEY_A) {
+					System.out.println("Left"); 
+				} else if (e.getKeyCode() == KEY_D) {
+					System.out.println("Right"); 
+				}
+			}
+			
+		});
 		
 		GameDrawingPanel gamePanel = new GameDrawingPanel();
 		this.add(gamePanel, BorderLayout.CENTER);
@@ -60,6 +86,8 @@ class GameDrawingPanel extends JComponent {
 	int[] polyXArray = Rock.sPolyXArray;
 	int[] polyYArray = Rock.sPolyYArray;
 	
+	SpaceShip spaceShip = new SpaceShip();
+	
 	// Get the game board's height and width
 	int width = GameBoard.boardWidth;
 	int height = GameBoard.boardHeight;
@@ -92,5 +120,7 @@ class GameDrawingPanel extends JComponent {
 			graphicSettings.draw(rock); // Draw it on the screen
 		}
 		
+		spaceShip.move();
+		graphicSettings.draw(spaceShip);
 	}
 }
