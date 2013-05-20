@@ -1,5 +1,13 @@
 import java.awt.Polygon;
 
+/**
+ * The SpaceShip class holds data needed for the drawing and
+ * movement of the space ship for the game.
+ * @author Casey Scarborough
+ * @see GameBoard
+ *
+ */
+@SuppressWarnings("serial")
 public class SpaceShip extends Polygon {
 	int uLeftXPos = 500;
 	int uLeftYPos = 400;
@@ -9,8 +17,11 @@ public class SpaceShip extends Polygon {
 	int width = GameBoard.boardWidth;
 	int height = GameBoard.boardHeight;
 	
-	public static int[] polyXArray = {500, 527, 500, 508, 500};
-	public static int[] polyYArray = {400, 415, 430, 415, 400};
+	// Holds x and y coordinates for the ship
+	public static int[] polyXArray = {-13, 14, -13, -5, -13};
+	public static int[] polyYArray = {-15, 0, 15, 0, -15};
+	
+	static int rotationAngle = 0;
 	
 	public SpaceShip() {
 		super(polyXArray, polyYArray, 5);
@@ -29,5 +40,8 @@ public class SpaceShip extends Polygon {
 			super.xpoints[i] += xDirection;
 			super.ypoints[i] += yDirection;
 		}
+		
+		super.xpoints = SpaceShip.polyXArray;
+		super.ypoints = SpaceShip.polyYArray;
 	}
 }
