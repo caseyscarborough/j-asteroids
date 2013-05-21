@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Asteroids in Java by caseyscarborough</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/caseyscarborough/j-asteroids">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/caseyscarborough/j-asteroids/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/caseyscarborough/j-asteroids/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Asteroids in Java</h1>
+          <p>An implementation of the classic arcade game Asteroids using Java.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/caseyscarborough">caseyscarborough</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>Asteroids in Java</h1>
+
+<p>This is an bare bones implementation of the classic Asteroids video arcade game using the Java programming language.</p>
+
+<p>The game is a simple black screen with asteroids that float around. The objective of the game is to fly your space ship around the screen without getting hit by any asteroids while at the same time shooting as many asteroids as possible and accumulating points.</p>
+
+<p><img src="https://github.com/caseyscarborough/j-asteroids/raw/master/resources/img/1.png" alt="alt text" title="The game's main layout."></p>
+
+<p>The technical documentation for the game can be viewed <a href="http://caseyscarborough.github.com/j-asteroids/doc/">here</a>.</p>
+
+<h2>Controls</h2>
+
+<p>The following are the controls in the game:</p>
+
+<ul>
+<li>W: Forward (Accelerate)</li>
+<li>A: Rotate Counter-clockwise</li>
+<li>S: Reverse (Slow down)</li>
+<li>D: Rotate Clockwise</li>
+<li>E: Stop the ship at the current location</li>
+<li>Enter: Fire lasers</li>
+</ul><h2>Scoring System</h2>
+
+<p>The player is able to accumulate score by destroying asteroids during gameplay. Each asteroid destroyed earns the player 10 points. If the player's ship is hit by an asteroid, the player will return to the starting position and lose 10 points.</p>
+
+<p>After destroying all asteroids, the player will receive a final score and some statistics about the game such as total shots fired, asteroids destroyed, times ship exploded, and accuracy. The player can then exit the game using the exit button.</p>
+
+<h2>Running the Game</h2>
+
+<p>Included in the repository is a .jar executable file. It contains the game in its currently developed state. This can be run from the command line by using the following command:</p>
+
+<pre><code>java -jar asteroids.jar
+</code></pre>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
