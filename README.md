@@ -3,21 +3,22 @@ Asteroids in Java
 
 This is an implementation of the classic Asteroids video arcade game using the Java programming language.
 
-The game is a simple black screen with asteroids that float around. The objective of the game is to fly your space ship around the screen without getting hit by any asteroids, while at the same time shooting as many asteroids as possible.
+The game is a simple black screen with asteroids that float around. The objective of the game is to fly your space ship around the screen without getting hit by any asteroids while at the same time shooting as many asteroids as possible and accumulating points.
 
 ![alt text][screenshot]
 
 Controls
 --------
 
-Currently the only three options available for the game are moving, stopping, and rotating. The following are the keys used for each option:
+The following are the controls in the game:
+
 - W: Forward (Accelerate)
 - A: Rotate Counter-clockwise
 - S: Reverse (Slow down)
 - D: Rotate Clockwise
 - E: Stop the ship at the current location
+- Enter: Fire lasers
 
-More controls are to come as I implement them.
 
 Running the Game
 ----------------
