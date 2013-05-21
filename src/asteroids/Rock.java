@@ -1,7 +1,7 @@
+package asteroids;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
-
 
 /**
  * The Rock class is a subclass of Polygon and holds the data and methods
@@ -9,6 +9,7 @@ import java.util.ArrayList;
  * points held in two static arrays.
  * @author Casey Scarborough
  * @see GameBoard
+ * @version 1.0.3
  */
 @SuppressWarnings("serial")
 public class Rock extends Polygon {
@@ -36,7 +37,6 @@ public class Rock extends Polygon {
 		// Set the x and y direction speeds to a random int between 1 and 5
 		this.xDirection = (int) (Math.random() * 4 + 1);
 		this.yDirection = (int) (Math.random() * 4 + 1);
-		int direction = (int) (Math.random()* 2 -1);
 		
 		this.uLeftXPos = randomStartXPos;
 		this.uLeftYPos = randomStartYPos;
@@ -69,8 +69,8 @@ public class Rock extends Polygon {
 		int uLeftYPos = super.ypoints[0];
 		
 		// Collision detection for rocks, if it hits a wall, direction changes
-		if(uLeftXPos < 0 || (uLeftXPos + 25) > width) this.xDirection *= -1;
-		if(uLeftYPos < 0 || (uLeftYPos + 50) > height) this.yDirection *= -1;
+		if(uLeftXPos < 0 || (uLeftXPos + 29) > width) this.xDirection *= -1;
+		if(uLeftYPos < 0 || (uLeftYPos + 31) > height) this.yDirection *= -1;
 		
 		// Move the values of the points for the polygon in their direction
 		for(int i = 0; i < super.xpoints.length; i++) {

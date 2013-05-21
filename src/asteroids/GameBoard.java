@@ -1,3 +1,4 @@
+package asteroids;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -13,9 +14,8 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-
 /**
- * The GameBoard class holds the information needed for creation of the game board
+ * Holds the information needed for creation of the game board
  * and also is used as the main driver for the application.
  * @author Casey Scarborough
  * @since 2013-05-19
@@ -35,13 +35,18 @@ public class GameBoard extends JFrame {
 	public static boolean keyHeld = false;
 	public static int keyHeldCode;
 	
+	/**
+	 * This is the main method and driver for the application.
+	 * It sole purpose is to create the game board.
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		new GameBoard();
 	}
 
 	/**
-	 * Sets the size, title, default close operation, and creates a new
-	 * game panel.
+	 * The constructor for the GameBoard class; sets the size, 
+	 * title, default close operation, and creates a new game panel.
 	 */
 	public GameBoard() {
 		this.setSize(boardWidth, boardHeight);
@@ -57,14 +62,22 @@ public class GameBoard extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == Key.W) {
 					System.out.println("Forward"); 
+					keyHeldCode = e.getKeyCode();
+					keyHeld = true;
 				} else if (e.getKeyCode() == Key.S) {
 					System.out.println("Backward"); 
+					keyHeldCode = e.getKeyCode();
+					keyHeld = true;
 				} else if (e.getKeyCode() == Key.D) {
 					System.out.println("Rotate Right"); 
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				 } else if (e.getKeyCode() == Key.A) {
 					System.out.println("Rotate Left"); 
+					keyHeldCode = e.getKeyCode();
+					keyHeld = true;
+				} else if( e.getKeyCode() == Key.E) {
+					System.out.println("Stopping ship..."); 
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				}
@@ -86,6 +99,7 @@ public class GameBoard extends JFrame {
 		ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
 		// Repaint the game board every 20ms, method, initial delay, subsequent delay, time unit
 		executor.scheduleAtFixedRate(new RepaintTheBoard(this), 0L, 20L, TimeUnit.MILLISECONDS);
+		this.setResizable(false);
 		this.setVisible(true);
 	}
 }
@@ -103,6 +117,9 @@ class RepaintTheBoard implements Runnable {
 	public RepaintTheBoard(GameBoard gameBoard) {
 		this.gameBoard = gameBoard;
 	}
+	/**
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		gameBoard.repaint();
 	}
@@ -116,7 +133,10 @@ class RepaintTheBoard implements Runnable {
  */
 @SuppressWarnings("serial")
 class GameDrawingPanel extends JComponent {
-	// Create an array list to hold all rocks
+	
+	/**
+	 * An ArrayList used to hold all of the currently displayed rocks.
+	 */
 	public ArrayList<Rock> rocks = new ArrayList<>();
 	
 	// Get the x and y points for the rock
@@ -129,9 +149,9 @@ class GameDrawingPanel extends JComponent {
 	int width = GameBoard.boardWidth;
 	int height = GameBoard.boardHeight;
 	
-	// Create 50 Rock objects and store them in our rocks ArrayList
+	// Create 15 Rock objects and store them in our rocks ArrayList
 	public GameDrawingPanel() {
-		for(int i = 0; i < 20; i++) {
+		for(int i = 0; i < 15; i++) {
 			// Get a random x and y starting position, the -40 is to keep rock on the screen
 			int randomStartXPos = (int) (Math.random() * (GameBoard.boardWidth - 40) + 1);
 			int randomStartYPos = (int) (Math.random() * (GameBoard.boardHeight - 40) + 1);
@@ -142,6 +162,9 @@ class GameDrawingPanel extends JComponent {
 		}
 	}
 	
+	/**
+	 * @see javax.swing.JComponent#paint(java.awt.Graphics)
+	 */
 	public void paint(Graphics g) {
 		Graphics2D graphicSettings = (Graphics2D) g;
 		
@@ -163,9 +186,23 @@ class GameDrawingPanel extends JComponent {
 		
 		// Check to see if the D or A keys are being held and spins the ship in the correct direction
 		if(GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.D) {
-			SpaceShip.rotationAngle += 10;
+			spaceShip.increaseRotationAngle();
+			System.out.println("Rotation angle: " + spaceShip.getRotationAngle()); 
 		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.A) {
-			SpaceShip.rotationAngle -= 10;
+			spaceShip.decreaseRotationAngle();
+			System.out.println("Rotation angle: " + spaceShip.getRotationAngle()); 
+		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.W) {
+			spaceShip.setMovingAngle(spaceShip.getRotationAngle());
+			spaceShip.increaseXVelocity(spaceShip.shipXMoveAngle(spaceShip.getMovingAngle())*0.1);
+			spaceShip.increaseYVelocity(spaceShip.shipYMoveAngle(spaceShip.getMovingAngle())*0.1);
+			System.out.println("Speeding up at angle: " + spaceShip.getMovingAngle()); 
+		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.S) {
+			spaceShip.setMovingAngle(spaceShip.getRotationAngle());
+			spaceShip.decreaseXVelocity(spaceShip.shipXMoveAngle(spaceShip.getMovingAngle())*0.1);
+			spaceShip.decreaseYVelocity(spaceShip.shipYMoveAngle(spaceShip.getMovingAngle())*0.1);
+			System.out.println("Slowing down at angle: " + spaceShip.getMovingAngle()); 
+		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.E) {
+			spaceShip.stopShip();
 		}
 		
 		spaceShip.move();
@@ -173,9 +210,9 @@ class GameDrawingPanel extends JComponent {
 		// Sets the origin of the screen
 		graphicSettings.setTransform(identity);
 		// Moves the ship to the center of the screen
-		graphicSettings.translate(GameBoard.boardWidth/2, GameBoard.boardHeight/2);
+		graphicSettings.translate(spaceShip.getXCenter(), spaceShip.getYCenter());
 		// Rotate the ship
-		graphicSettings.rotate(Math.toRadians(SpaceShip.rotationAngle));
+		graphicSettings.rotate(Math.toRadians(spaceShip.getRotationAngle()));
 		
 		graphicSettings.draw(spaceShip);
 	}
