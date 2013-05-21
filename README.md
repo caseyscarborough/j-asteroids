@@ -1,11 +1,13 @@
 Asteroids in Java
 =================
 
-This is an implementation of the classic Asteroids video arcade game using the Java programming language.
+This is an bare bones implementation of the classic Asteroids video arcade game using the Java programming language.
 
 The game is a simple black screen with asteroids that float around. The objective of the game is to fly your space ship around the screen without getting hit by any asteroids while at the same time shooting as many asteroids as possible and accumulating points.
 
 ![alt text][screenshot]
+
+The technical documentation for the game can be viewed [here][documentation].
 
 Controls
 --------
@@ -19,6 +21,12 @@ The following are the controls in the game:
 - E: Stop the ship at the current location
 - Enter: Fire lasers
 
+Scoring System
+--------------
+
+The player is able to accumulate score by destroying asteroids during gameplay. Each asteroid destroyed earns the player 10 points. If the player's ship is hit by an asteroid, the player will return to the starting position and lose 10 points.
+
+After destroying all asteroids, the player will receive a final score and some statistics about the game such as total shots fired, asteroids destroyed, times ship exploded, and accuracy. The player can then exit the game using the exit button.
 
 Running the Game
 ----------------
@@ -28,4 +36,5 @@ Included in the repository is a .jar executable file. It contains the game in it
 java -jar asteroids.jar
 ```
 
+[documentation]: http://caseyscarborough.github.com/j-asteroids/doc/
 [screenshot]: https://github.com/caseyscarborough/j-asteroids/raw/master/resources/img/1.png "The game's main layout."
