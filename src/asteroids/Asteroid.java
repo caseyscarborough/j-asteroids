@@ -52,6 +52,10 @@ public class Asteroid extends Polygon {
 	public static int[] getStartingPolyXArray() { return sPolyXArray; }
 	public static int[] getStartingPolyYArray() { return sPolyYArray; }
 	
+	public static void resetAsteroidsDestroyed() { Asteroid.asteroidsDestroyed = 0; }
+	public static void resetTimesExploded() { Asteroid.timesExploded = 0; }
+	
+	
 	// Used to return a rectangle used for collision detection of the asteroids
 	public Rectangle getBounds() {
 		return new Rectangle(super.xpoints[0], super.ypoints[0], asteroidWidth, asteroidHeight);
@@ -82,7 +86,7 @@ public class Asteroid extends Polygon {
 					if(otherasteroid.intersects(shipBox)) {
 						// Set interaction to false to keep from dying from start and play sound
 						SpaceShip.interaction = false;
-						Sound.playSoundEffect(Sound.explosion);
+						if (GameBoard.soundOn == true) { Sound.playSoundEffect(Sound.explosion); }
 						// Set the ship to the center and set velocity to 0
 						spaceShip.setXCenter(spaceShip.gameBoardWidth/2);
 						spaceShip.setYCenter(spaceShip.gameBoardHeight/2);
@@ -103,7 +107,7 @@ public class Asteroid extends Polygon {
 							// Remove the asteroid and the laser and play sound
 							asteroid.onScreen = false;
 							laser.onScreen = false;
-							Sound.playSoundEffect(Sound.explosion);
+							if (GameBoard.soundOn == true) { Sound.playSoundEffect(Sound.explosion); }
 							GameBoard.points += 10;
 							GameBoard.score.setText("Score: " + GameBoard.points);
 							System.out.println("You destroyed an asteroid! You gain 10 points.");

@@ -1,10 +1,12 @@
 package asteroids;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -37,8 +39,8 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class GameBoard extends JFrame {
 	// Height and width of the gameboard
-	public static int boardWidth = 1000;
-	public static int boardHeight = 800;
+	public static int boardWidth = 900;
+	public static int boardHeight = 720;
 	public static int numberOfAsteroids = 15;
 	
 	public static boolean keyHeld = false;
@@ -51,6 +53,8 @@ public class GameBoard extends JFrame {
 	public static JLayeredPane lpane;
 	public static JButton restart, exit;
 	
+	public static boolean soundOn = true;
+	
 	static int shotsFired = 0;
 
 	/**
@@ -59,17 +63,20 @@ public class GameBoard extends JFrame {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		new GameBoard();
+		new WelcomeScreen();
 	}
 
 	/**
 	 * The constructor for the GameBoard class; sets the size, 
 	 * title, default close operation, and creates a new game panel.
 	 */
-	public GameBoard() {
+	public GameBoard(int numberOfAsteroids, boolean soundOn) {
+		GameBoard.numberOfAsteroids = numberOfAsteroids;
+		GameBoard.soundOn = soundOn;
 		this.setSize(boardWidth, boardHeight);
 		this.setTitle("Java Asteroids");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.centerWindow();
 		
 		score = new JLabel();
 		score.setFont(new Font("Sans-serif", Font.PLAIN, 20));
@@ -86,8 +93,17 @@ public class GameBoard extends JFrame {
 		resultsPanel = new JPanel(new BorderLayout());
 		resultsPanel.setBackground(Color.BLACK);
 		
+		restart = new JButton("Restart Game");
 		exit = new JButton("Exit");
 		
+		restart.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == restart) {
+					closeWindow();
+					GameBoard.main(null);
+				}
+			}
+		});
 		exit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == exit) { System.exit(0); }
@@ -105,7 +121,7 @@ public class GameBoard extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == Key.W) {
 					SpaceShip.interaction = true;
-					Sound.playSoundEffect(Sound.thrust);
+					if (GameBoard.soundOn == true) { Sound.playSoundEffect(Sound.thrust); }
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				} else if (e.getKeyCode() == Key.S) {
@@ -126,7 +142,7 @@ public class GameBoard extends JFrame {
 					keyHeld = true;
 				} else if (e.getKeyCode() == Key.ENTER) {
 					SpaceShip.interaction = true;
-					Sound.playSoundEffect(Sound.laser);
+					if (GameBoard.soundOn == true) { Sound.playSoundEffect(Sound.laser); }
 					lasers.add(new Laser(GameDrawingPanel.spaceShip.getShipNoseX(), 
 							GameDrawingPanel.spaceShip.getShipNoseY(),
 							GameDrawingPanel.spaceShip.getRotationAngle()));
@@ -153,7 +169,7 @@ public class GameBoard extends JFrame {
 		this.add(resultsPanel, BorderLayout.SOUTH);
 		
 		// Create a new thread pool with 5 threads
-		ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
+		ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
 		// Repaint the game board every 20ms, method, initial delay, subsequent delay, time unit
 		executor.scheduleAtFixedRate(new RepaintTheBoard(this), 0L, 20L, TimeUnit.MILLISECONDS);
 		this.setResizable(false);
@@ -165,9 +181,28 @@ public class GameBoard extends JFrame {
 		DecimalFormat twoDecimalPlaces = new DecimalFormat("#.##");
 		double accuracy = ((double)asteroidsDestroyed/(double)GameBoard.shotsFired)*100;
 		accuracy = Double.valueOf(twoDecimalPlaces.format(accuracy));
-		results.setText("Times Exploded: " + timesExploded + "      Asteroids Destroyed: " + asteroidsDestroyed + "      Shots Fired: " + GameBoard.shotsFired + "      Accuracy: " + accuracy + "%");
+		results.setText("Times Exploded: " + timesExploded + "  Asteroids Destroyed: " + asteroidsDestroyed + "  Shots Fired: " + GameBoard.shotsFired + "  Accuracy: " + accuracy + "%");
 		resultsPanel.add(results, BorderLayout.WEST);
 		resultsPanel.add(exit, BorderLayout.EAST);
+		scorePanel.add(GameBoard.restart, BorderLayout.EAST);
+	}
+	
+	private void closeWindow() { 
+		this.dispose();
+		GameBoard.points = 0;
+		GameBoard.shotsFired = 0;
+		
+		Asteroid.resetAsteroidsDestroyed();
+		Asteroid.resetTimesExploded();
+	}
+	
+	private void centerWindow() {
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		int width = this.getSize().width;
+		int height = this.getSize().height;
+		int x = (dim.width - width) / 2;
+		int y = (dim.height - height) / 2;
+		this.setLocation(x, y);
 	}
 }
 
