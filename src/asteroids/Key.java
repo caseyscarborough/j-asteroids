@@ -1,5 +1,7 @@
 package asteroids;
 
+import java.awt.event.KeyEvent;
+
 /**
  * Holds the values for common keys used in the game.
  * @author Casey Scarborough
@@ -27,7 +29,7 @@ public class Key {
 	 */
 	public static final int E = 69;
 	/**
-	 * Contains the key code value for the space bar, 32.
+	 * Contains the key code value for the enter key.
 	 */
-	public static final int SPACEBAR = 32;
+	public static int ENTER = KeyEvent.VK_ENTER;
 }

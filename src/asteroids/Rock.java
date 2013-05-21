@@ -9,13 +9,17 @@ import java.util.ArrayList;
  * points held in two static arrays.
  * @author Casey Scarborough
  * @see GameBoard
- * @version 1.0.3
+ * @version 1.0.4
  */
 @SuppressWarnings("serial")
 public class Rock extends Polygon {
 	int uLeftXPos, uLeftYPos;
 	int xDirection = 1;
 	int yDirection = 1;
+	static int asteroidsDestroyed = 0;
+	static int timesExploded = 0;
+	
+	boolean onScreen = true;
 	
 	// Get the width and height of the gameboard
 	int width = GameBoard.boardWidth;
@@ -48,20 +52,61 @@ public class Rock extends Polygon {
 	}
 	
 	// Used to move to rocks and check for collisions between them
-	public void move() {
+	public void move(SpaceShip spaceShip, ArrayList<Laser> lasers) {
+		
 		// Create a new rectangle based on the current rock
 		Rectangle rockToCheck = this.getBounds();
 		for(Rock rock : rocks) { // Loop through the rocks and check
-			Rectangle otherRock = rock.getBounds();
-			// If we are not checking it against itself, and it intersects with another rock
-			if(rock != this && otherRock.intersects(rockToCheck)) {
-				// Swap the directions of the rocks (rock1 gets rock2's values and vice versa)
-				int tempXDirection = this.xDirection;
-				int tempYDirection = this.yDirection;
-				this.xDirection = rock.xDirection;
-				this.yDirection = rock.yDirection;
-				rock.xDirection = tempXDirection;
-				rock.yDirection = tempYDirection;
+			if (rock.onScreen) {
+				Rectangle otherRock = rock.getBounds();
+				// If we are not checking it against itself, and it intersects with another rock
+				if(rock != this && otherRock.intersects(rockToCheck)) {
+					// Swap the directions of the rocks (rock1 gets rock2's values and vice versa)
+					int tempXDirection = this.xDirection;
+					int tempYDirection = this.yDirection;
+					this.xDirection = rock.xDirection;
+					this.yDirection = rock.yDirection;
+					rock.xDirection = tempXDirection;
+					rock.yDirection = tempYDirection;
+				}
+				
+				Rectangle shipBox = spaceShip.getBounds();
+				if(SpaceShip.interaction == true) {
+					if(otherRock.intersects(shipBox)) {
+						SpaceShip.interaction = false;
+						GameBoard.playSoundEffect(Sound.explosion);
+						spaceShip.setXCenter(spaceShip.gameBoardWidth/2);
+						spaceShip.setYCenter(spaceShip.gameBoardHeight/2);
+						spaceShip.setXVelocity(0);
+						spaceShip.setYVelocity(0);
+						GameBoard.points -= 10;
+						GameBoard.score.setText("Score: " + GameBoard.points);
+						System.out.println("HIT! You lose 10 points."); 
+						System.out.println("Score: " + GameBoard.points);
+						timesExploded += 1;
+					}
+				}
+				
+				for(Laser laser : lasers) {
+					if(laser.onScreen) {
+						if(otherRock.contains(laser.getXCenter(), laser.getYCenter()) | rockToCheck.contains(laser.getXCenter(), laser.getYCenter())) {
+							rock.onScreen = false;
+							laser.onScreen = false;
+							GameBoard.playSoundEffect(Sound.explosion);
+							GameBoard.points += 10;
+							GameBoard.score.setText("Score: " + GameBoard.points);
+							System.out.println("You destroyed an asteroid! You gain 10 points.");
+							System.out.println("Score: " + GameBoard.points);
+							asteroidsDestroyed += 1;
+							System.out.println("Asteroids destroyed: " + asteroidsDestroyed); 
+							if (asteroidsDestroyed >= GameBoard.numberOfAsteroids) {
+								System.out.println("Game Over!");
+								GameBoard.score.setText("Game Over! Final Score: " + GameBoard.points);
+								GameBoard.displayResults(asteroidsDestroyed, timesExploded);
+							}
+						}
+					}
+				}
 			}
 		}
 		

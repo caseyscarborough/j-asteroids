@@ -1,25 +1,37 @@
 package asteroids;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
+import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
 
 /**
  * Holds the information needed for creation of the game board
  * and also is used as the main driver for the application.
  * @author Casey Scarborough
  * @since 2013-05-19
- * @version 1.0.2
+ * @version 1.1.1
  * @see Rock
  * @see SpaceShip
  * @see Key
@@ -31,10 +43,19 @@ public class GameBoard extends JFrame {
 	// Height and width of the gameboard
 	public static int boardWidth = 1000;
 	public static int boardHeight = 800;
+	public static int numberOfAsteroids = 15;
 	
 	public static boolean keyHeld = false;
 	public static int keyHeldCode;
+	public static ArrayList<Laser> lasers = new ArrayList<>();
+	public static int points = 0;
+	public static JLabel score;
+	public static JPanel scorePanel, resultsPanel;
+	public static JLabel results;
+	public static JLayeredPane lpane;
 	
+	static int shotsFired = 0;
+
 	/**
 	 * This is the main method and driver for the application.
 	 * It sole purpose is to create the game board.
@@ -53,33 +74,58 @@ public class GameBoard extends JFrame {
 		this.setTitle("Java Asteroids");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		score = new JLabel();
+		score.setFont(new Font("Sans-serif", Font.PLAIN, 20));
+		score.setForeground(Color.WHITE);
+		score.setText("Score: " + points);
+		
+		results = new JLabel();
+		results.setFont(new Font("Sans-serif", Font.PLAIN, 20));
+		results.setForeground(Color.WHITE);
+		
+		scorePanel = new JPanel(new BorderLayout());
+		scorePanel.setBackground(Color.BLACK);
+		
+		resultsPanel = new JPanel(new BorderLayout());
+		resultsPanel.setBackground(Color.BLACK);
+		
+		
 		this.addKeyListener(new KeyListener() {
 			
 			@Override
 			public void keyTyped(KeyEvent e) {}
 			
+			// Check for key presses in the game
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == Key.W) {
-					System.out.println("Forward"); 
+					SpaceShip.interaction = true;
+					playSoundEffect(Sound.thrust);
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				} else if (e.getKeyCode() == Key.S) {
-					System.out.println("Backward"); 
+					SpaceShip.interaction = true;
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				} else if (e.getKeyCode() == Key.D) {
-					System.out.println("Rotate Right"); 
+					SpaceShip.interaction = true;
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				 } else if (e.getKeyCode() == Key.A) {
-					System.out.println("Rotate Left"); 
+					SpaceShip.interaction = true;
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				} else if( e.getKeyCode() == Key.E) {
 					System.out.println("Stopping ship..."); 
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
+				} else if (e.getKeyCode() == Key.ENTER) {
+					SpaceShip.interaction = true;
+					playSoundEffect(Sound.laser);
+					lasers.add(new Laser(GameDrawingPanel.spaceShip.getShipNoseX(), 
+							GameDrawingPanel.spaceShip.getShipNoseY(),
+							GameDrawingPanel.spaceShip.getRotationAngle()));
+					shotsFired += 1;
 				}
 			}
 			
@@ -95,12 +141,46 @@ public class GameBoard extends JFrame {
 		GameDrawingPanel gamePanel = new GameDrawingPanel();
 		this.add(gamePanel, BorderLayout.CENTER);
 		
+		scorePanel.add(score, BorderLayout.WEST);
+		this.add(scorePanel, BorderLayout.NORTH);
+		this.add(resultsPanel, BorderLayout.SOUTH);
+		
 		// Create a new thread pool with 5 threads
 		ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
 		// Repaint the game board every 20ms, method, initial delay, subsequent delay, time unit
 		executor.scheduleAtFixedRate(new RepaintTheBoard(this), 0L, 20L, TimeUnit.MILLISECONDS);
 		this.setResizable(false);
 		this.setVisible(true);
+	}
+	
+	/**
+	 * Used to play sound.
+	 * @param soundToPlay a String specifying the location of the sound file.
+	 */
+	public static void playSoundEffect(String soundToPlay) {
+		URL soundLocation;
+		try {
+			soundLocation = new URL(soundToPlay);
+			Clip clip = null;
+			clip = AudioSystem.getClip();
+			AudioInputStream inputStream;
+			inputStream = AudioSystem.getAudioInputStream(soundLocation);
+			clip.open(inputStream);
+			clip.loop(0);
+			clip.start();
+		} catch (LineUnavailableException | UnsupportedAudioFileException
+				| IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void displayResults(int asteroidsDestroyed, int timesExploded) {
+		DecimalFormat twoDecimalPlaces = new DecimalFormat("#.##");
+		double accuracy = ((double)asteroidsDestroyed/(double)GameBoard.shotsFired)*100;
+		accuracy = Double.valueOf(twoDecimalPlaces.format(accuracy));
+		results.setText("Times Exploded: " + timesExploded + "      Asteroids Destroyed: " + asteroidsDestroyed + "      Shots Fired: " + GameBoard.shotsFired + "      Accuracy: " + accuracy + "%");
+		resultsPanel.add(results, BorderLayout.SOUTH);
 	}
 }
 
@@ -143,7 +223,7 @@ class GameDrawingPanel extends JComponent {
 	int[] polyXArray = Rock.sPolyXArray;
 	int[] polyYArray = Rock.sPolyYArray;
 	
-	SpaceShip spaceShip = new SpaceShip();
+	static SpaceShip spaceShip = new SpaceShip();
 	
 	// Get the game board's height and width
 	int width = GameBoard.boardWidth;
@@ -151,7 +231,7 @@ class GameDrawingPanel extends JComponent {
 	
 	// Create 15 Rock objects and store them in our rocks ArrayList
 	public GameDrawingPanel() {
-		for(int i = 0; i < 15; i++) {
+		for(int i = 0; i < GameBoard.numberOfAsteroids; i++) {
 			// Get a random x and y starting position, the -40 is to keep rock on the screen
 			int randomStartXPos = (int) (Math.random() * (GameBoard.boardWidth - 40) + 1);
 			int randomStartYPos = (int) (Math.random() * (GameBoard.boardHeight - 40) + 1);
@@ -180,27 +260,25 @@ class GameDrawingPanel extends JComponent {
 		
 		// Cycle through all rocks in rocks ArrayList
 		for(Rock rock : rocks) {
-			rock.move(); // Move the rock
-			graphicSettings.draw(rock); // Draw it on the screen
+			if(rock.onScreen) {
+				rock.move(spaceShip, GameBoard.lasers); // Move the rock
+				graphicSettings.draw(rock); // Draw it on the screen
+			}
 		}
 		
 		// Check to see if the D or A keys are being held and spins the ship in the correct direction
 		if(GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.D) {
 			spaceShip.increaseRotationAngle();
-			System.out.println("Rotation angle: " + spaceShip.getRotationAngle()); 
 		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.A) {
 			spaceShip.decreaseRotationAngle();
-			System.out.println("Rotation angle: " + spaceShip.getRotationAngle()); 
 		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.W) {
 			spaceShip.setMovingAngle(spaceShip.getRotationAngle());
 			spaceShip.increaseXVelocity(spaceShip.shipXMoveAngle(spaceShip.getMovingAngle())*0.1);
 			spaceShip.increaseYVelocity(spaceShip.shipYMoveAngle(spaceShip.getMovingAngle())*0.1);
-			System.out.println("Speeding up at angle: " + spaceShip.getMovingAngle()); 
 		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.S) {
 			spaceShip.setMovingAngle(spaceShip.getRotationAngle());
 			spaceShip.decreaseXVelocity(spaceShip.shipXMoveAngle(spaceShip.getMovingAngle())*0.1);
 			spaceShip.decreaseYVelocity(spaceShip.shipYMoveAngle(spaceShip.getMovingAngle())*0.1);
-			System.out.println("Slowing down at angle: " + spaceShip.getMovingAngle()); 
 		} else if (GameBoard.keyHeld == true && GameBoard.keyHeldCode == Key.E) {
 			spaceShip.stopShip();
 		}
@@ -215,5 +293,15 @@ class GameDrawingPanel extends JComponent {
 		graphicSettings.rotate(Math.toRadians(spaceShip.getRotationAngle()));
 		
 		graphicSettings.draw(spaceShip);
+		
+		// Draw lasers
+		for (Laser laser : GameBoard.lasers) {
+			laser.move();
+			if(laser.onScreen) {
+				graphicSettings.setTransform(identity);
+				graphicSettings.translate(laser.getXCenter(), laser.getYCenter());
+				graphicSettings.draw(laser);
+			}
+		}
 	}
 }

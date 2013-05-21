@@ -1,0 +1,3 @@
+laser: http://www.freesound.org/people/fins/sounds/146725/
+explosion: http://www.freesound.org/people/timgormly/sounds/170144/
+thrust: http://newthinktank.com
