@@ -5,21 +5,17 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
-import java.io.IOException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,7 +28,7 @@ import javax.swing.JPanel;
  * @author Casey Scarborough
  * @since 2013-05-19
  * @version 1.1.1
- * @see Rock
+ * @see Asteroid
  * @see SpaceShip
  * @see Key
  * @see GameDrawingPanel
@@ -53,6 +49,7 @@ public class GameBoard extends JFrame {
 	public static JPanel scorePanel, resultsPanel;
 	public static JLabel results;
 	public static JLayeredPane lpane;
+	public static JButton restart, exit;
 	
 	static int shotsFired = 0;
 
@@ -89,6 +86,14 @@ public class GameBoard extends JFrame {
 		resultsPanel = new JPanel(new BorderLayout());
 		resultsPanel.setBackground(Color.BLACK);
 		
+		exit = new JButton("Exit");
+		
+		exit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == exit) { System.exit(0); }
+			}
+		});
+		
 		
 		this.addKeyListener(new KeyListener() {
 			
@@ -100,7 +105,7 @@ public class GameBoard extends JFrame {
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == Key.W) {
 					SpaceShip.interaction = true;
-					playSoundEffect(Sound.thrust);
+					Sound.playSoundEffect(Sound.thrust);
 					keyHeldCode = e.getKeyCode();
 					keyHeld = true;
 				} else if (e.getKeyCode() == Key.S) {
@@ -121,7 +126,7 @@ public class GameBoard extends JFrame {
 					keyHeld = true;
 				} else if (e.getKeyCode() == Key.ENTER) {
 					SpaceShip.interaction = true;
-					playSoundEffect(Sound.laser);
+					Sound.playSoundEffect(Sound.laser);
 					lasers.add(new Laser(GameDrawingPanel.spaceShip.getShipNoseX(), 
 							GameDrawingPanel.spaceShip.getShipNoseY(),
 							GameDrawingPanel.spaceShip.getRotationAngle()));
@@ -138,9 +143,11 @@ public class GameBoard extends JFrame {
 			
 		});
 		
+		// Create new game panel
 		GameDrawingPanel gamePanel = new GameDrawingPanel();
 		this.add(gamePanel, BorderLayout.CENTER);
 		
+		// Create panel for score and results and add it to the screen
 		scorePanel.add(score, BorderLayout.WEST);
 		this.add(scorePanel, BorderLayout.NORTH);
 		this.add(resultsPanel, BorderLayout.SOUTH);
@@ -153,34 +160,14 @@ public class GameBoard extends JFrame {
 		this.setVisible(true);
 	}
 	
-	/**
-	 * Used to play sound.
-	 * @param soundToPlay a String specifying the location of the sound file.
-	 */
-	public static void playSoundEffect(String soundToPlay) {
-		URL soundLocation;
-		try {
-			soundLocation = new URL(soundToPlay);
-			Clip clip = null;
-			clip = AudioSystem.getClip();
-			AudioInputStream inputStream;
-			inputStream = AudioSystem.getAudioInputStream(soundLocation);
-			clip.open(inputStream);
-			clip.loop(0);
-			clip.start();
-		} catch (LineUnavailableException | UnsupportedAudioFileException
-				| IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	public static void displayResults(int asteroidsDestroyed, int timesExploded) {
 		DecimalFormat twoDecimalPlaces = new DecimalFormat("#.##");
 		double accuracy = ((double)asteroidsDestroyed/(double)GameBoard.shotsFired)*100;
 		accuracy = Double.valueOf(twoDecimalPlaces.format(accuracy));
 		results.setText("Times Exploded: " + timesExploded + "      Asteroids Destroyed: " + asteroidsDestroyed + "      Shots Fired: " + GameBoard.shotsFired + "      Accuracy: " + accuracy + "%");
-		resultsPanel.add(results, BorderLayout.SOUTH);
+		resultsPanel.add(results, BorderLayout.WEST);
+		resultsPanel.add(exit, BorderLayout.EAST);
 	}
 }
 
@@ -215,13 +202,13 @@ class RepaintTheBoard implements Runnable {
 class GameDrawingPanel extends JComponent {
 	
 	/**
-	 * An ArrayList used to hold all of the currently displayed rocks.
+	 * An ArrayList used to hold all of the currently displayed asteroids.
 	 */
-	public ArrayList<Rock> rocks = new ArrayList<>();
+	public ArrayList<Asteroid> asteroids = new ArrayList<>();
 	
-	// Get the x and y points for the rock
-	int[] polyXArray = Rock.sPolyXArray;
-	int[] polyYArray = Rock.sPolyYArray;
+	// Get the x and y points for the asteroid
+	int[] polyXArray = Asteroid.getStartingPolyXArray();
+	int[] polyYArray = Asteroid.getStartingPolyYArray();
 	
 	static SpaceShip spaceShip = new SpaceShip();
 	
@@ -229,16 +216,16 @@ class GameDrawingPanel extends JComponent {
 	int width = GameBoard.boardWidth;
 	int height = GameBoard.boardHeight;
 	
-	// Create 15 Rock objects and store them in our rocks ArrayList
+	// Create 15 asteroid objects and store them in our asteroids ArrayList
 	public GameDrawingPanel() {
 		for(int i = 0; i < GameBoard.numberOfAsteroids; i++) {
-			// Get a random x and y starting position, the -40 is to keep rock on the screen
+			// Get a random x and y starting position, the -40 is to keep asteroid on the screen
 			int randomStartXPos = (int) (Math.random() * (GameBoard.boardWidth - 40) + 1);
 			int randomStartYPos = (int) (Math.random() * (GameBoard.boardHeight - 40) + 1);
 			
-			// Create the rock using the constructor and add it to our array
-			rocks.add(new Rock(Rock.getPolyXArray(randomStartXPos), Rock.getPolyYArray(randomStartYPos), 13, randomStartXPos, randomStartYPos));
-			Rock.rocks = rocks;
+			// Create the asteroid using the constructor and add it to our array
+			asteroids.add(new Asteroid(Asteroid.getPolyXArray(randomStartXPos), Asteroid.getPolyYArray(randomStartYPos), 13, randomStartXPos, randomStartYPos));
+			Asteroid.asteroids = asteroids;
 		}
 	}
 	
@@ -258,11 +245,11 @@ class GameDrawingPanel extends JComponent {
 		graphicSettings.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		graphicSettings.setPaint(Color.WHITE);
 		
-		// Cycle through all rocks in rocks ArrayList
-		for(Rock rock : rocks) {
-			if(rock.onScreen) {
-				rock.move(spaceShip, GameBoard.lasers); // Move the rock
-				graphicSettings.draw(rock); // Draw it on the screen
+		// Cycle through all asteroids in asteroids ArrayList
+		for(Asteroid asteroid : asteroids) {
+			if(asteroid.onScreen) {
+				asteroid.move(spaceShip, GameBoard.lasers); // Move the asteroid
+				graphicSettings.draw(asteroid); // Draw it on the screen
 			}
 		}
 		
